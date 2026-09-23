@@ -65,12 +65,34 @@
     pendingFormData = null;
   };
 
+  // Same check as the DevTools command: typeof window.hsw === "function"
+  function updateHswDialog() {
+    const resultEl = document.getElementById('hswResult');
+    const noteEl = document.getElementById('hswNote');
+    if (!resultEl || !noteEl) return;
+
+    const value = typeof window.hsw === 'function';
+    resultEl.textContent = String(value);
+
+    const hcaptchaFrame = [...document.querySelectorAll('iframe')].some((frame) =>
+      (frame.src || '').includes('hcaptcha.html')
+    );
+
+    noteEl.textContent = hcaptchaFrame
+      ? 'DevTools showed true with the console set to hcaptcha.html. This box reads the page window, and that frame stays separate.'
+      : '';
+  }
+
   // hCaptcha calls this once the SDK is ready
   window.onHcaptchaLoad = () => {
     widgetId = hcaptcha.render('hcaptcha-widget');
+    updateHswDialog();
   };
 
   document.addEventListener('DOMContentLoaded', () => {
+    updateHswDialog();
+    setInterval(updateHswDialog, 1000);
+
     const form = document.getElementById('registerForm');
     form.addEventListener('submit', (e) => {
       e.preventDefault();
